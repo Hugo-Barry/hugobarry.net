@@ -1,0 +1,9 @@
+# wrangler.toml
+name = "hugobarry.net"
+account_id = "b63afd3f3a08e7e2a82995afd630961e"
+compatibility_date = "2025-10-27"
+
+[pages]
+# The directory containing your built site or static files
+build_output_dir = "./"
+
