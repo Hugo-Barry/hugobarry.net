@@ -51,6 +51,7 @@
         createEngine({
             canvas: document.getElementById("canvas"),
             executable: "95_windows",
+            basePath: "./",   // THIS FIXES YOUR ERROR
         }).then(engine => {
             engine.startGame().then(() => {
                 document.getElementById("loading").remove();
