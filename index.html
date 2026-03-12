@@ -26,19 +26,16 @@ body {
 	outline: none;
 }
 
-#status, #status-splash, #status-progress {
+#status, #status-splash {
 	position: absolute;
 	left: 0;
 	right: 0;
-}
-
-#status, #status-splash {
 	top: 0;
 	bottom: 0;
 }
 
 #status {
-	background-color: #242424;
+	background-color: #000;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -46,37 +43,8 @@ body {
 	visibility: hidden;
 }
 
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
-
-#status-splash.show-image--false {
-	display: none;
-}
-
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
 #status-notice {
+	display: none;
 	background-color: #5b3943;
 	border-radius: 0.5rem;
 	border: 1px solid #9b3943;
@@ -91,8 +59,7 @@ body {
 }
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="95_windows.icon.png" />
-<link rel="apple-touch-icon" href="95_windows.apple-touch-icon.png"/>
-
+		<link rel="apple-touch-icon" href="95_windows.apple-touch-icon.png"/>
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -103,13 +70,10 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 
-        <div id="status">
-            <div id="loading" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;">
-                <img src="loading.png" alt="Loading" style="width:256px;height:auto;" />
-            </div>
-            <progress id="status-progress" style="display:none;"></progress>
-            <div id="status-notice"></div>
-        </div>
+		<div id="status">
+			<img src="loading.png" alt="Loading" style="width:256px;height:auto;" />
+			<div id="status-notice"></div>
+		</div>
 
 		<script src="95_windows.js"></script>
 		<script>
@@ -119,7 +83,6 @@ const engine = new Engine(GODOT_CONFIG);
 
 (function () {
 	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
 	const statusNotice = document.getElementById('status-notice');
 
 	let initializing = true;
@@ -135,7 +98,6 @@ const engine = new Engine(GODOT_CONFIG);
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
 		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
 		statusMode = mode;
 	}
@@ -176,7 +138,6 @@ const engine = new Engine(GODOT_CONFIG);
 			} catch (err) {
 				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
 			}
-			// There's a chance that installing the service worker would fix the issue
 			Promise.race([
 				serviceWorkerRegistrationPromise.then((registration) => {
 					if (registration != null) {
@@ -184,18 +145,15 @@ const engine = new Engine(GODOT_CONFIG);
 					}
 					return registration;
 				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), 2000);
 				}),
 			]).then(() => {
-				// Reload if there was no error.
 				window.location.reload();
 			}).catch((err) => {
 				console.error('Error while registering service worker:', err);
 			});
 		} else {
-			// Display the message as usual
 			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
 			displayFailureNotice(missingMsg + missing.join('\n'));
 		}
@@ -203,13 +161,7 @@ const engine = new Engine(GODOT_CONFIG);
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
-				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
-				}
+				// Progress bar removed - loading image shows instead
 			},
 		}).then(() => {
 			setStatusMode('hidden');
@@ -219,4 +171,3 @@ const engine = new Engine(GODOT_CONFIG);
 		</script>
 	</body>
 </html>
-
