@@ -26,10 +26,13 @@ body {
 	outline: none;
 }
 
-#status, #status-splash {
+#status, #status-splash, #status-progress {
 	position: absolute;
 	left: 0;
 	right: 0;
+}
+
+#status, #status-splash {
 	top: 0;
 	bottom: 0;
 }
@@ -43,8 +46,27 @@ body {
 	visibility: hidden;
 }
 
-#status-notice {
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false {
 	display: none;
+}
+
+#status-splash.fullsize--true {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+	image-rendering: pixelated;
+}
+
+#status-notice {
 	background-color: #5b3943;
 	border-radius: 0.5rem;
 	border: 1px solid #9b3943;
@@ -59,7 +81,8 @@ body {
 }
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="95_windows.icon.png" />
-		<link rel="apple-touch-icon" href="95_windows.apple-touch-icon.png"/>
+<link rel="apple-touch-icon" href="95_windows.apple-touch-icon.png"/>
+
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -70,14 +93,14 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 
-		<div id="status">
-			<img src="loading.png" alt="Loading" style="width:100%;height:100%;object-fit:contain;" />
-			<div id="status-notice"></div>
-		</div>
+        <div id="status">
+            <img src="loading.png" alt="Loading" style="width:100%;height:100%;object-fit:contain;" />
+            <div id="status-notice"></div>
+        </div>
 
 		<script src="95_windows.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"95_windows","experimentalVK":false,"fileSizes":{"95_windows.pck":355624,"95_windows.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"95_windows","experimentalVK":false,"fileSizes":{"95_windows.pck":357444,"95_windows.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -98,7 +121,6 @@ const engine = new Engine(GODOT_CONFIG);
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
 		statusMode = mode;
 	}
 
@@ -138,6 +160,7 @@ const engine = new Engine(GODOT_CONFIG);
 			} catch (err) {
 				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
 			}
+			// There's a chance that installing the service worker would fix the issue
 			Promise.race([
 				serviceWorkerRegistrationPromise.then((registration) => {
 					if (registration != null) {
@@ -145,15 +168,18 @@ const engine = new Engine(GODOT_CONFIG);
 					}
 					return registration;
 				}).then(() => engine.installServiceWorker()),
+				// For some reason, `getRegistration()` can stall
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), 2000);
 				}),
 			]).then(() => {
+				// Reload if there was no error.
 				window.location.reload();
 			}).catch((err) => {
 				console.error('Error while registering service worker:', err);
 			});
 		} else {
+			// Display the message as usual
 			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
 			displayFailureNotice(missingMsg + missing.join('\n'));
 		}
@@ -161,7 +187,8 @@ const engine = new Engine(GODOT_CONFIG);
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
-				// Progress bar removed - loading image shows instead
+// gone
+				}
 			},
 		}).then(() => {
 			setStatusMode('hidden');
@@ -171,3 +198,4 @@ const engine = new Engine(GODOT_CONFIG);
 		</script>
 	</body>
 </html>
+
