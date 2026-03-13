@@ -38,7 +38,7 @@ body {
 }
 
 #status {
-	background-color: #000;
+	background-color: #242424;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -64,6 +64,16 @@ body {
 
 #status-splash.use-filter--false {
 	image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
 }
 
 #status-notice {
@@ -93,19 +103,21 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 
-        <div id="status">
-            <img src="loading.png" alt="Loading" style="width:100%;height:100%;object-fit:contain;" />
-            <div id="status-notice"></div>
-        </div>
+		<div id="status">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="95_windows.png" alt="">
+			<progress id="status-progress"></progress>
+			<div id="status-notice"></div>
+		</div>
 
 		<script src="95_windows.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"95_windows","experimentalVK":false,"fileSizes":{"95_windows.pck":357444,"95_windows.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"95_windows","experimentalVK":false,"fileSizes":{"95_windows.pck":339856,"95_windows.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
 (function () {
 	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
 	const statusNotice = document.getElementById('status-notice');
 
 	let initializing = true;
@@ -121,6 +133,8 @@ const engine = new Engine(GODOT_CONFIG);
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
 		statusMode = mode;
 	}
 
@@ -187,8 +201,13 @@ const engine = new Engine(GODOT_CONFIG);
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
-// gone
-				
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
 			},
 		}).then(() => {
 			setStatusMode('hidden');
